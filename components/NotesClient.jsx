@@ -13,7 +13,6 @@ const NotesClient = ({ initialNotes }) => {
 
     const createNote = async (e) => {
         e.preventDefault()
-
         if (!title.trim() || !content.trim()) return;
         setLoading(true);
 
@@ -32,7 +31,6 @@ const NotesClient = ({ initialNotes }) => {
                 setTitle("");
                 setContent("");
             }
-
         } catch (error) {
             console.error("Error creating note:", error);
             toast.error("Something went wrong");
@@ -53,7 +51,6 @@ const NotesClient = ({ initialNotes }) => {
                 setNotes(notes.filter(note => note._id !== id));
                 toast.success("Notes Deleted Successfully");
             }
-
         } catch (error) {
             console.error("Error deleting notes", error);
             toast.error("Something went wrong");
@@ -82,7 +79,6 @@ const NotesClient = ({ initialNotes }) => {
                 setEditTitle("");
                 setEditContent("");
             }
-
         } catch (error) {
             console.error("Error updating note", error);
             toast.error("Something went wrong");
@@ -98,35 +94,45 @@ const NotesClient = ({ initialNotes }) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
 
             {/* Create Note */}
-            <form className="bg-white p-6 rounded-lg shadow-md" onSubmit={createNote}>
-                <h2 className="text-xl font-semibold mb-4 text-black">Create New Note</h2>
+            <form
+                onSubmit={createNote}
+                className="bg-white/90 backdrop-blur border border-gray-200 rounded-xl shadow-sm p-5 sm:p-6 lg:p-8"
+            >
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 text-center">
+                    Create New Note
+                </h2>
 
                 <div className="space-y-4">
                     <input
                         type="text"
-                        className="w-full border-2 border-black rounded-md p-3 text-black"
-                        placeholder="Note Title"
+                        placeholder="Note title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm sm:text-base
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                         required
                     />
 
                     <textarea
-                        placeholder="Note Content"
+                        placeholder="Write your note here..."
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         rows={4}
-                        className="w-full border-2 border-black rounded-md p-3 text-black"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm sm:text-base
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-black"
                         required
                     />
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-blue-500 border-2 border-black rounded-md hover:bg-blue-700 px-6 py-2 disabled:opacity-50"
+                        className="inline-flex items-center justify-center rounded-lg
+                                   bg-blue-600 px-6 py-2.5 text-sm sm:text-base font-medium text-white
+                                   hover:bg-blue-700 active:scale-[0.98]
+                                   disabled:opacity-50 disabled:cursor-not-allowed transition"
                     >
                         {loading ? "Creating..." : "Create Note"}
                     </button>
@@ -135,78 +141,96 @@ const NotesClient = ({ initialNotes }) => {
 
             {/* Notes List */}
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Your Notes ({notes.length})</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                    Your Notes ({notes.length})
+                </h2>
 
                 {notes.length === 0 ? (
-                    <p className="text-gray-500">No Notes yet. Create your first note above.</p>
+                    <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-gray-500">
+                        No notes yet. Create your first note above.
+                    </div>
                 ) : (
-                    notes.map(note => (
-                        <div key={note._id} className="bg-white p-6 rounded-lg shadow-md">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {notes.map(note => (
+                            <div
+                                key={note._id}
+                                className="group relative bg-white border border-gray-200 rounded-xl
+                                           p-5 shadow-sm hover:shadow-md transition"
+                            >
+                                {editingId === note._id ? (
+                                    <>
+                                        <input
+                                            value={editTitle}
+                                            onChange={(e) => setEditTitle(e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 px-3 py-2 mb-2
+                                                       focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
 
-                            {editingId === note._id ? (
-                                <>
-                                    <input
-                                        type="text"
-                                        value={editTitle}
-                                        onChange={(e) => setEditTitle(e.target.value)}
-                                        className="w-full border-2 border-black rounded-md p-2 mb-2 text-black"
-                                    />
+                                        <textarea
+                                            value={editContent}
+                                            onChange={(e) => setEditContent(e.target.value)}
+                                            rows={4}
+                                            className="w-full rounded-md border border-gray-300 px-3 py-2 mb-3
+                                                       focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                                        />
 
-                                    <textarea
-                                        value={editContent}
-                                        onChange={(e) => setEditContent(e.target.value)}
-                                        rows={4}
-                                        className="w-full border-2 border-black rounded-md p-2 mb-2 text-black"
-                                    />
-
-                                    <div className="flex gap-2">
-                                        <button
-                                            className="bg-green-500 border-2 border-black rounded-md px-4 py-1 text-sm"
-                                            onClick={() => updateNote(note._id)}
-                                            disabled={loading}
-                                        >
-                                            {loading ? "Updating..." : "Save"}
-                                        </button>
-
-                                        <button
-                                            className="bg-gray-400 border-2 border-black rounded-md px-4 py-1 text-sm"
-                                            onClick={() => setEditingId(null)}
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-lg font-semibold">{note.title}</h3>
                                         <div className="flex gap-2">
                                             <button
-                                                className="text-blue-500 hover:text-blue-700 text-sm"
-                                                onClick={() => startEdit(note)}
+                                                onClick={() => updateNote(note._id)}
+                                                disabled={loading}
+                                                className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm
+                                                           text-white hover:bg-green-700 disabled:opacity-50 transition"
                                             >
-                                                Edit
+                                                {loading ? "Saving..." : "Save"}
                                             </button>
+
                                             <button
-                                                className="text-red-500 hover:text-red-700 text-sm"
-                                                onClick={() => deleteNote(note._id)}
+                                                onClick={() => setEditingId(null)}
+                                                className="flex-1 rounded-md bg-gray-200 px-3 py-2 text-sm
+                                                           text-gray-700 hover:bg-gray-300 transition"
                                             >
-                                                Delete
+                                                Cancel
                                             </button>
                                         </div>
-                                    </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex items-start justify-between mb-2">
+                                            <h3 className="font-semibold text-gray-900 line-clamp-2">
+                                                {note.title}
+                                            </h3>
 
-                                    <p className="text-gray-500 mb-2">{note.content}</p>
-                                    <p>Created: {new Date(note.createdAt).toLocaleDateString()}</p>
+                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                                                <button
+                                                    onClick={() => startEdit(note)}
+                                                    className="text-xs text-blue-600 hover:underline"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteNote(note._id)}
+                                                    className="text-xs text-red-600 hover:underline"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
 
-                                    {note.updatedAt !== note.createdAt && (
-                                        <p>Updated: {new Date(note.updatedAt).toLocaleDateString()}</p>
-                                    )}
-                                </>
-                            )}
+                                        <p className="text-sm text-gray-600 line-clamp-4 mb-3">
+                                            {note.content}
+                                        </p>
 
-                        </div>
-                    ))
+                                        <div className="text-xs text-gray-400 space-y-0.5">
+                                            <p>Created: {new Date(note.createdAt).toLocaleDateString()}</p>
+                                            {note.updatedAt !== note.createdAt && (
+                                                <p>Updated: {new Date(note.updatedAt).toLocaleDateString()}</p>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>
