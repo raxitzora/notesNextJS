@@ -1,6 +1,6 @@
 "use client"
 import React,{useState} from 'react'
-import { resumeToPipeableStream } from 'react-dom/server';
+import toast from 'react-hot-toast';
 
 const NotesClient = ({initialNotes}) => {
     const [notes,setNotes] = useState(initialNotes)
@@ -23,6 +23,7 @@ const NotesClient = ({initialNotes}) => {
             const result = await response.json();
             if(result.success){
                 setNotes([result.data,...notes])
+                toast.success("Notes Created successfully")
                 setTitle("")
                 setContent("")
             }
@@ -31,9 +32,33 @@ const NotesClient = ({initialNotes}) => {
             
         } catch (error) {
             console.error("Error creating note:",error);
+            toast.error("Something went wrong")
             
             
         }
+    }
+
+    const deleteNote = async(id)=>{
+        try {
+            const response = await fetch(`/api/notes/${id}`,{
+                method:"DELETE"
+            })
+            const result = await response.json();
+
+            if(result.success){
+                setNotes(notes.filter((note)=>note._id!==id))
+                toast.success("Notes Deleted Successfully")
+
+            }
+
+            
+        } catch (error) {
+            console.error("Error deleting notes");
+            toast.error("Something went wrong")
+            
+            
+        }
+
     }
   return (
     <div className='space-y-6'>
@@ -79,7 +104,7 @@ const NotesClient = ({initialNotes}) => {
                             <h3 className='text-lg font-semibold'>{note.title}</h3>
                             <div className='flex gap-2'>
                                 <button className='text-blue-500 hover:text-blue-700 text-sm'>Edit</button>
-                                <button className='text-red-500 hover:text-red-700 text-sm'>Delete</button>
+                                <button className='text-red-500 hover:text-red-700 text-sm'onClick={()=>deleteNote(note._id)}>Delete</button>
                             </div>
                         </div>
                         <p className='text-gray-500 mb-2'>
