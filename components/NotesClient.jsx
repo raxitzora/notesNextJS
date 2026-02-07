@@ -7,6 +7,9 @@ const NotesClient = ({initialNotes}) => {
     const [title,setTitle] = useState("");
     const [content,setContent] = useState("");
     const [loading,setLoading] = useState(false);
+    const [editingId,setEditingId] = useState(null); 
+    const [editTitle,setEditTitle] = useState("");
+    const [editContent,setEditContent] = useState();
 
     const createNote = async(e)=>{
         e.preventDefault()
@@ -60,6 +63,51 @@ const NotesClient = ({initialNotes}) => {
         }
 
     }
+
+    const updateNote = async(id)=>{
+        if(!title.trim() || !content.trim()) return;
+        setLoading(true)
+        try {
+            const response = await fetch(`/api/notes/${id}`,{
+                method:"PUT",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({title:editTitle,content:editContent})
+            })
+            const result = await response.json()
+
+            if(result.success){
+                toast.success("Notes updated successfully")
+                setNotes(notes.map((note)=>(
+                    note._id===id?result.data:note
+                )))
+                setEditingId(null)
+                setEditTitle("")
+                setEditContent("")
+            }
+
+            setLoading(false);
+
+            
+        } catch (error) {
+            console.error("Error updating ");
+            toast.error("Something went wrong")
+            
+        }
+    }
+
+    const startEdit = (note)=>{
+        setEditingId(note._id);
+        setEditTitle(note.title)
+        setEditContent(note.content)
+    }
+
+     const cancleEdit = (note)=>{
+        setEditingId(note._id);
+        setEditTitle(note.title)
+        setEditContent(note.content)
+    }
+
+
   return (
     <div className='space-y-6'>
 
@@ -103,7 +151,7 @@ const NotesClient = ({initialNotes}) => {
                         <div className='flex justify-between items-start mb-2'>
                             <h3 className='text-lg font-semibold'>{note.title}</h3>
                             <div className='flex gap-2'>
-                                <button className='text-blue-500 hover:text-blue-700 text-sm'>Edit</button>
+                                <button className='text-blue-500 hover:text-blue-700 text-sm' onClick={()=>startEdit(note)}>Edit</button>
                                 <button className='text-red-500 hover:text-red-700 text-sm'onClick={()=>deleteNote(note._id)}>Delete</button>
                             </div>
                         </div>
